@@ -1,0 +1,51 @@
+Un archivo gitignore especifica los archivos intencionalmente sin seguimiento que Git debe ignorar. Los archivos ya rastreados por Git no se ven afectados; Vea las NOTAS a continuación para más detalles.
+
+Cada línea de un archivo gitignore especifica un patrón. Al decidir si ignora una ruta, Git normalmente verifica los patrones gitignore de múltiples fuentes, con el siguiente orden de precedencia, de mayor a menor (dentro de un nivel de precedencia, el último patrón coincidente decide el resultado):
+
+Los patrones se leen desde la línea de comandos para aquellos comandos que los soportan.
+
+Los patrones se leen desde un archivo .gitignore en el mismo directorio que la ruta o en cualquier directorio padre, con patrones en los archivos de nivel superior (hasta el toplevel del árbol de trabajo) que son anulados por aquellos en archivos de nivel inferior hasta el directorio Contiene el archivo. Estos patrones coinciden con la ubicación del archivo .gitignore. Un proyecto normalmente incluye archivos .gitignore en su repositorio, que contienen patrones para los archivos generados como parte de la compilación del proyecto.
+
+Patrones leídos de $ GIT_DIR / info / exclude.
+
+Patrones leídos del archivo especificado por la variable de configuración core.excludesFile.
+
+Qué patrón depende de cómo el patrón está destinado a ser utilizado.
+
+Los patrones que deben ser controlados por versiones y distribuidos a otros repositorios vía clon (es decir, archivos que todos los desarrolladores desearán ignorar) deben entrar en un archivo .gitignore.
+
+Los patrones que son específicos de un repositorio en particular pero que no necesitan ser compartidos con otros repositorios relacionados (por ejemplo, archivos auxiliares que viven dentro del repositorio pero que son específicos de su flujo de trabajo) deben ir al archivo $ GIT_DIR / info / exclude.
+
+Los patrones que un usuario desea ignorar en todas las situaciones (p. Ej., Archivos de copia de seguridad o temporales generados por el editor del usuario de su elección) usualmente entran en un archivo especificado por core.excludesFile en ~ / .gitconfig del usuario. Su valor predeterminado es $ XDG_CONFIG_HOME / git / ignore. Si $ XDG_CONFIG_HOME está establecida o está vacía, en su lugar se usa $ HOME / .config / git / ignore.
+
+Las herramientas de plomería subyacentes de Git, como git ls-files y git read-tree, leen los patrones de gitignore especificados por las opciones de la línea de comandos o desde los archivos especificados por las opciones de la línea de comandos. Las herramientas Git de nivel superior, como el estado git y git add, usan patrones de las fuentes especificadas anteriormente.
+
+FORMATO DEL MODELO
+Una línea en blanco no coincide con ningún archivo, por lo que sirve como un separador para la legibilidad.
+
+Una línea que comienza con # sirve como un comentario. Ponga una barra invertida ("\") delante del primer hash para patrones que comiencen con un hash.
+
+Los espacios finales se ignoran a menos que se citen con barra invertida ("\").
+
+Un prefijo opcional "!" Lo que niega el patrón; Cualquier archivo coincidente excluido por un patrón anterior se volverá a incluir. No es posible volver a incluir un archivo si se excluye el directorio padre de ese archivo. Git no lista directorios excluidos por razones de rendimiento, por lo que cualquier patrón en los archivos contenidos no tienen ningún efecto, no importa dónde se definen. Ponga una barra invertida ("\") delante de la primera "!" Para los patrones que comienzan con un literal "!", Por ejemplo, "\! Importante! .txt".
+
+Si el patrón termina con una barra, se elimina con el propósito de la siguiente descripción, pero sólo encontraría una coincidencia con un directorio. En otras palabras, foo / coincidirá con el directorio foo y caminos debajo de él, pero no coincidirá con el archivo regular o un enlace simbólico foo (esto es coherente con la forma en que pathespec funciona en general en Git).
+
+Si el patrón no contiene la barra diagonal, Git lo trata como un patrón glob y comprueba si hay una coincidencia con la ruta relativa a la ubicación del archivo .gitignore (relativa al toplevel del árbol de trabajo si no es de un archivo .gitignore) .
+
+De lo contrario, Git trata el patrón como una shell globalmente adecuada para el consumo por fnmatch (3) con el indicador FNM_PATHNAME: los comodines del patrón no coinciden con / en la ruta. Por ejemplo, "Documentation / *. Html" coincide con "Documentation / git.html" pero no "Documentation / ppc / ppc.html" o "tools / perf / Documentation / perf.html".
+
+Una barra inclinada principal coincide con el inicio de la ruta. Por ejemplo, "/*.c" coincide con "cat-file.c" pero no con "mozilla-sha1 / sha1.c".
+
+Dos asteriscos consecutivos ("**") en patrones comparados con la ruta de acceso completa pueden tener un significado especial:
+
+Un "**" principal seguido de una barra significa coincidencia en todos los directorios. Por ejemplo, "** / foo" coincide con el archivo o directorio "foo" en cualquier lugar, igual que el patrón "foo". "/ Foo / bar" coincide con el archivo o directorio "barra" en cualquier lugar que esté directamente en el directorio "foo".
+
+Un "/ **" arrastra todo dentro. Por ejemplo, "abc / **" coincide con todos los archivos dentro del directorio "abc", con respecto a la ubicación del archivo .gitignore, con una profundidad infinita.
+
+Un slash seguido de dos asteriscos consecutivos a continuación, para cortar ceros cero o más directorios. Por ejemplo, "a / ** / b" coincide con "a / b", "a / x / b", "a / x / y / b" y así sucesivamente.
+
+Se consideran inválidos otros asteriscos consecutivos.
+
+NOTAS
+El propósito de los archivos gitignore es asegurar que ciertos archivos no se encuentren en la pista
